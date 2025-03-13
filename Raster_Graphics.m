@@ -182,6 +182,30 @@ function generateJPEGJPEG2000Statistics()
     fprintf('\nSSIM: ');
     fprintf('%.2f ', jp2SSIM);
     fprintf('\n');
+    
+    figure;
+    
+    % Plot PSNR vs. Image Size
+    subplot(1, 2, 1);
+    plot(jpgFileSizes, jpgPSNR, '-o', 'DisplayName', 'JPEG');
+    hold on;
+    plot(jp2FileSizes, jp2PSNR, '-x', 'DisplayName', 'JPEG2000');
+    hold off;
+    xlabel('Image Size [kB]');
+    ylabel('PSNR [dB]');
+    title('PSNR vs. Image Size');
+    legend('show');
+    
+    % Plot SSIM vs. Image Size
+    subplot(1, 2, 2);
+    plot(jpgFileSizes, jpgSSIM, '-o', 'DisplayName', 'JPEG');
+    hold on;
+    plot(jp2FileSizes, jp2SSIM, '-x', 'DisplayName', 'JPEG2000');
+    hold off;
+    xlabel('Image Size [kB]');
+    ylabel('SSIM');
+    title('SSIM vs. Image Size');
+    legend('show');
 end
 
 imageProcessor();
