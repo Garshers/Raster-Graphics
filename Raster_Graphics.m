@@ -1,6 +1,5 @@
 function imageProcessor()
-    choice = input('Choose an image processing function:\n1. PNG and GIF conversion\n2. JPG and JPEG2000 compression\n3. Clear command\nYour choice: ');
-
+    choice = input('Choose an image processing function:\n1. PNG and GIF conversion\n2. JPG and JPEG2000 compression\n3. Generate Statistics for JPEG/JPEG2000\n4. Clear command\nYour choice: ');
     switch choice
         case 1
             fprintf('----- Processing  Image PNG/GIF() -----\n');
@@ -9,6 +8,9 @@ function imageProcessor()
             fprintf('----- Process Image JPEG/JPEG2000() -----\n');
             processImageJPEGJPEG2000();
         case 3
+            fprintf('----- Generate Statistics for JPEG/JPEG2000 -----\n');
+            generateJPEGJPEG2000Statistics();
+        case 4
             clc;
             clear all;
             close all;
@@ -120,6 +122,66 @@ function processImageJPEGJPEG2000()
     fprintf('JPEG2000: CR1 and CR2 represent the compression ratios. Higher values mean higher compression but lower quality.\n');
     fprintf('Note: JPG uses Discrete Cosine Transform, JPEG2000 uses Wavelet Transform.\n');
 
+end
+
+function generateJPEGJPEG2000Statistics()
+    [filename, pathname] = uigetfile({'*.bmp;*.tiff;*'}, 'Select original image (BMP or TIFF)');
+    if isequal(filename, 0)
+        fprintf('User cancelled file selection.\n');
+        return;
+    end
+    originalImage = imread(fullfile(pathname, filename));
+    
+    % JPG Statistics
+    qualityLevels = 5:5:100;
+    jpgFileSizes = zeros(size(qualityLevels));
+    jpgPSNR = zeros(size(qualityLevels));
+    jpgSSIM = zeros(size(qualityLevels));
+    
+    for i = 1:length(qualityLevels)
+        imwrite(originalImage, sprintf('temp_Q%d.jpg', qualityLevels(i)), 'Quality', qualityLevels(i));
+        jpgFileSizes(i) = dir(sprintf('temp_Q%d.jpg', qualityLevels(i))).bytes / 1024; % in kB
+        compressedImage = imread(sprintf('temp_Q%d.jpg', qualityLevels(i)));
+        jpgPSNR(i) = psnr(originalImage, compressedImage);
+        jpgSSIM(i) = ssim(originalImage, compressedImage);
+        delete(sprintf('temp_Q%d.jpg', qualityLevels(i))); % Clean up temporary files
+    end
+    
+    % JPEG2000 Statistics
+    compressionRatios = 1:2:101;
+    jp2FileSizes = zeros(size(compressionRatios));
+    jp2PSNR = zeros(size(compressionRatios));
+    jp2SSIM = zeros(size(compressionRatios));
+    
+    for i = 1:length(compressionRatios)
+        imwrite(originalImage, sprintf('temp_CR%d.jp2', compressionRatios(i)), 'CompressionRatio', compressionRatios(i));
+        jp2FileSizes(i) = dir(sprintf('temp_CR%d.jp2', compressionRatios(i))).bytes / 1024; % in kB
+        compressedImage = imread(sprintf('temp_CR%d.jp2', compressionRatios(i)));
+        jp2PSNR(i) = psnr(originalImage, compressedImage);
+        jp2SSIM(i) = ssim(originalImage, compressedImage);
+        delete(sprintf('temp_CR%d.jp2', compressionRatios(i))); % Clean up temporary files
+    end
+    
+    % Display Results
+    fprintf('\n----- JPEG Statistics -----\n');
+    fprintf('Quality Levels: ');
+    fprintf('%d ', qualityLevels);
+    fprintf('\nFile Sizes (kB): ');
+    fprintf('%.2f ', jpgFileSizes);
+    fprintf('\nPSNR (dB): ');
+    fprintf('%.2f ', jpgPSNR);
+    fprintf('\nSSIM: ');
+    fprintf('%.2f ', jpgSSIM);
+    fprintf('\n\n----- JPEG2000 Statistics -----\n');
+    fprintf('Compression Ratios: ');
+    fprintf('%d ', compressionRatios);
+    fprintf('\nFile Sizes (kB): ');
+    fprintf('%.2f ', jp2FileSizes);
+    fprintf('\nPSNR (dB): ');
+    fprintf('%.2f ', jp2PSNR);
+    fprintf('\nSSIM: ');
+    fprintf('%.2f ', jp2SSIM);
+    fprintf('\n');
 end
 
 imageProcessor();
