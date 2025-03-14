@@ -1,13 +1,13 @@
 # Raster Graphics
 
-The "Raster Graphics" project analyzes and compares various raster image compression methods, both lossless (PNG, GIF) and lossy (JPG, JPEG2000), evaluating their impact on file size and image quality through PSNR calculations.
+The "Raster Graphics" project analyzes and compares various raster image compression methods, both lossless (PNG, GIF) and lossy (JPG, JPEG2000), evaluating their impact on file size and image quality through PSNR and SSIM calculations.
 
 ## Features
 
 The project includes the following functions:
 
-* **processImagePNGGIF()**: Converts images to PNG and GIF formats, compares file sizes, and calculates PSNR.
-* **processImageJPEGJPEG2000()**: Compresses images using JPG and JPEG2000 algorithms with different compression levels, compares file sizes, and calculates PSNR.
+* **processImagePNGGIF()**: Converts images to PNG and GIF formats, compares file sizes, and calculates PSNR and SSIM.
+* **processImageJPEGJPEG2000()**: Compresses images using JPG and JPEG2000 algorithms with predefined quality levels and compression ratios, compares file sizes, and calculates PSNR and SSIM.
 * **generateJPEGJPEG2000Statistics()**: Generates detailed statistics for JPEG and JPEG2000 compression, including file sizes, PSNR, and SSIM, for a range of quality levels and compression ratios. It also generates plots to visualize the relationship between file size and image quality metrics.
 * **imageProcessor()**: Allows the user to select the function to execute.
 
@@ -25,8 +25,8 @@ The project includes the following functions:
 
 ## Compression Parameters
 
-* **JPG**: Q1 and Q2 represent the quality levels (0-100). Higher values mean better quality but larger file size.
-* **JPEG2000**: CR1 and CR2 represent the compression ratios. Higher values mean higher compression but lower quality.
+* **JPG**: Quality levels are set to [1, 25, 50, 75, 100]. Higher values mean better quality but larger file size.
+* **JPEG2000**: Compression ratios are set to [1, 5, 30, 140, 250]. Higher values mean higher compression but lower quality.
 
 ## Additional Feature: generateJPEGJPEG2000Statistics()
 
@@ -38,7 +38,7 @@ The `generateJPEGJPEG2000Statistics()` function has been added to provide a more
 4.  Calculates and displays the file size, PSNR, and SSIM for each compression level.
 5.  Generates plots showing:
     * PSNR vs. Image Size
-    * SSIM vs. Image Size\
+    * SSIM vs. Image Size
 
 ### Summary
 
