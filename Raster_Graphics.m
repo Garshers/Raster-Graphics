@@ -70,6 +70,18 @@ function processImagePNGGIF()
         fprintf('PSNR PNG: %.2f dB\n', psnr_png);
     end
     fprintf('PSNR GIF: %.2f dB\n', psnr_gif);
+
+    ssim_gif = ssim(im2double(originalImage), gifImage);
+
+    describedPNG = insertText(pngImage, [10 10], sprintf('No compression (BMP):\nSize %2.f kB\nPNG (PSNR: %.2f dB)\nSize: %.2f kB', fileInfoPNG.bytes  / 1024, psnr_png, fileInfoPNG.bytes / 1024), 'FontSize', 14, 'TextColor', 'black', 'BoxOpacity', 0.4);
+    imwrite(describedPNG, 'PNGoutput.png');
+
+    describedGIF = insertText(pngImage, [10 10], sprintf('GIF\nSize: %.2f kB\nPSNR: %.2f dB\nSSIM: %.4f', fileInfoGIF.bytes / 1024, psnr_gif, ssim_gif), 'FontSize', 14, 'TextColor', 'black', 'BoxOpacity', 0.4);
+    [indexedImage, cmap] = rgb2ind(describedGIF, 256); 
+    imwrite(indexedImage, cmap, 'GIFoutput.png');
+
+    delete(sprintf('output.png'));
+    delete(sprintf('output.gif'));
 end
 
 function processImageJPEGJPEG2000()
@@ -133,7 +145,7 @@ function generateJPEGJPEG2000Statistics()
     originalImage = imread(fullfile(pathname, filename));
     
     % JPG Statistics
-    qualityLevels = 5:5:100;
+    qualityLevels = 1:2:100;
     jpgFileSizes = zeros(size(qualityLevels));
     jpgPSNR = zeros(size(qualityLevels));
     jpgSSIM = zeros(size(qualityLevels));
@@ -148,7 +160,7 @@ function generateJPEGJPEG2000Statistics()
     end
     
     % JPEG2000 Statistics
-    compressionRatios = 1:2:101;
+    compressionRatios = 1:1:100;
     jp2FileSizes = zeros(size(compressionRatios));
     jp2PSNR = zeros(size(compressionRatios));
     jp2SSIM = zeros(size(compressionRatios));
