@@ -92,48 +92,74 @@ function processImageJPEGJPEG2000()
     end
     originalImage = imread(fullfile(pathname, filename));
     fileInfoOriginal = dir(fullfile(pathname, filename));
-    %JPG
-    Q1 = 50; 
-    Q2 = 10; 
-    %JPEG2000
-    CR1 = 10; 
-    CR2 = 50; 
-    %JPG with different quality levels
-    imwrite(originalImage, 'output_Q1.jpg', 'Quality', Q1);
-    imwrite(originalImage, 'output_Q2.jpg', 'Quality', Q2);
-    %JPEG2000 with different compression ratios
-    imwrite(originalImage, 'output_CR1.jp2', 'CompressionRatio', CR1);
-    imwrite(originalImage, 'output_CR2.jp2', 'CompressionRatio', CR2);
-    jpg_Q1 = imread('output_Q1.jpg');
-    jpg_Q2 = imread('output_Q2.jpg');
-    jp2_CR1 = imread('output_CR1.jp2');
-    jp2_CR2 = imread('output_CR2.jp2');
-    psnr_jpg_Q1 = psnr(originalImage, jpg_Q1);
-    psnr_jpg_Q2 = psnr(originalImage, jpg_Q2);
-    psnr_jp2_CR1 = psnr(originalImage, jp2_CR1);
-    psnr_jp2_CR2 = psnr(originalImage, jp2_CR2);
-    fileInfo_Q1 = dir('output_Q1.jpg');
-    fileInfo_Q2 = dir('output_Q2.jpg');
-    fileInfo_CR1 = dir('output_CR1.jp2');
-    fileInfo_CR2 = dir('output_CR2.jp2');
-    %results
+    % JPG
+    Q = [1, 25, 50, 75, 100];
+    jpgFilenames = {'output_Q1.jpg', 'output_Q2.jpg', 'output_Q3.jpg', 'output_Q4.jpg', 'output_Q5.jpg'};
+    jpgData = cell(size(Q));
+    psnr_jpg = zeros(size(Q));
+    ssim_jpg = zeros(size(Q));
+    fileInfo_jpg = cell(size(Q));
+    % JPEG2000
+    CR = [1, 5, 30, 140, 250];
+    jp2Filenames = {'output_CR1.jp2', 'output_CR2.jp2', 'output_CR3.jp2', 'output_CR4.jp2', 'output_CR5.jp2'};
+    jp2Data = cell(size(CR));
+    psnr_jp2 = zeros(size(CR));
+    ssim_jp2 = zeros(size(CR));
+    fileInfo_jp2 = cell(size(CR));
+    % JPG Processing
+    for i = 1:length(Q)
+        imwrite(originalImage, jpgFilenames{i}, 'Quality', Q(i));
+        jpgData{i} = imread(jpgFilenames{i});
+        psnr_jpg(i) = psnr(originalImage, jpgData{i});
+        ssim_jpg(i) = ssim(originalImage, jpgData{i});
+        fileInfo_jpg{i} = dir(jpgFilenames{i});
+        
+        % Description for JPG
+        describedImage = insertText(jpgData{i}, [10 10], sprintf('JPG Q%d (%d%% quality)\nSize: %.2f kB\nPSNR: %.2f dB\nSSIM: %.4f', i, Q(i), fileInfo_jpg{i}.bytes / 1024, psnr_jpg(i), ssim_jpg(i)), 'FontSize', 14, 'TextColor', 'black', 'BoxOpacity', 0.4);
+        imwrite(describedImage, jpgFilenames{i});
+    end
+    % JPEG2000 Processing
+    for i = 1:length(CR)
+        imwrite(originalImage, jp2Filenames{i}, 'CompressionRatio', CR(i));
+        jp2Data{i} = imread(jp2Filenames{i});
+        psnr_jp2(i) = psnr(originalImage, jp2Data{i});
+        ssim_jp2(i) = ssim(originalImage, jp2Data{i});
+        fileInfo_jp2{i} = dir(jp2Filenames{i});
+        % Description for JPEG2000
+        describedImage = insertText(jp2Data{i}, [10 10], sprintf('JPEG2000 CR%d (CR=%d)\nSize: %.2f kB\nPSNR: %.2f dB\nSSIM: %.4f', i, CR(i), fileInfo_jp2{i}.bytes / 1024, psnr_jp2(i), ssim_jp2(i)), 'FontSize', 14, 'TextColor', 'black', 'BoxOpacity', 0.4);
+        imwrite(describedImage, jp2Filenames{i});
+    end
+    % results
     fprintf('\nFile sizes:\n');
     fprintf('Original: %d bytes\n', fileInfoOriginal.bytes);
-    fprintf('JPG Q1 (%d%% quality): %d bytes\n', Q1, fileInfo_Q1.bytes);
-    fprintf('JPG Q2 (%d%% quality): %d bytes\n', Q2, fileInfo_Q2.bytes);
-    fprintf('JPEG2000 CR1 (CR=%d): %d bytes\n', CR1, fileInfo_CR1.bytes);
-    fprintf('JPEG2000 CR2 (CR=%d): %d bytes\n', CR2, fileInfo_CR2.bytes);
+    for i = 1:length(Q)
+        fprintf('JPG Q%d (%d%% quality): %d bytes\n', i, Q(i), fileInfo_jpg{i}.bytes);
+    end
+    for i = 1:length(CR)
+        fprintf('JPEG2000 CR%d (CR=%d): %d bytes\n', i, CR(i), fileInfo_jp2{i}.bytes);
+    end
+    % PSNR values
     fprintf('\nPSNR values:\n');
-    fprintf('JPG Q1 (%d%% quality): %.2f dB\n', Q1, psnr_jpg_Q1);
-    fprintf('JPG Q2 (%d%% quality): %.2f dB\n', Q2, psnr_jpg_Q2);
-    fprintf('JPEG2000 CR1 (CR=%d): %.2f dB\n', CR1, psnr_jp2_CR1);
-    fprintf('JPEG2000 CR2 (CR=%d): %.2f dB\n', CR2, psnr_jp2_CR2);
+    for i = 1:length(Q)
+        fprintf('JPG Q%d (%d%% quality): %.2f dB\n', i, Q(i), psnr_jpg(i));
+    end
+    for i = 1:length(CR)
+        fprintf('JPEG2000 CR%d (CR=%d): %.2f dB\n', i, CR(i), psnr_jp2(i));
+    end
+    % SSIM values
+    fprintf('\nSSIM values:\n');
+    for i = 1:length(Q)
+        fprintf('JPG Q%d (%d%% quality): %.4f\n', i, Q(i), ssim_jpg(i));
+    end
+    for i = 1:length(CR)
+        fprintf('JPEG2000 CR%d (CR=%d): %.4f\n', i, CR(i), ssim_jp2(i));
+    end
+
     % Compression parameter explanation
     fprintf('\nCompression parameters:\n');
-    fprintf('JPG: Q1 and Q2 represent the quality levels (0-100). Higher values mean better quality but larger file size.\n');
-    fprintf('JPEG2000: CR1 and CR2 represent the compression ratios. Higher values mean higher compression but lower quality.\n');
+    fprintf('JPG: Q1, Q2, and Q3 represent the quality levels (0-100). Higher values mean better quality but larger file size.\n');
+    fprintf('JPEG2000: CR1, CR2, and CR3 represent the compression ratios. Higher values mean higher compression but lower quality.\n');
     fprintf('Note: JPG uses Discrete Cosine Transform, JPEG2000 uses Wavelet Transform.\n');
-
 end
 
 function generateJPEGJPEG2000Statistics()
